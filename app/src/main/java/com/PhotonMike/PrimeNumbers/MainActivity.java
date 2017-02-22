@@ -25,22 +25,46 @@ public class MainActivity extends AppCompatActivity {
                 boolean a = true;
                 try
                 {
-                    veg = Integer.parseInt(betext.getText().toString());
+                    veg = Integer.parseInt(betext.getText().toString())+1;
                 }
                 catch(Exception e)
                 {
                     kimenet.setText("@string/number_in");
                     a=false;
+                    veg=1;
                 }
                 if (a) {
-                    for (int i = 0; i <= veg; ) {
-                        if (isprime(prim)) {
-                            kimenet.append(Integer.toString(prim) + "\r\n");
-                            i++;
-                        }
-                        prim++;
-
+                    Thread szal = new Thread(new ThreadStart(primelist)) ;
+                    szal.Start();
+                    toltes.Maximum = vege;
+                    while (!szal.IsAlive)
+                    {
+                        kimenet.Text = "Szál inditása";
+                        kimenet.Update();
                     }
+                    while (szal.IsAlive)
+                    {
+                        kimenet.Text = "Várakozás az eredményre ("+Convert.ToString(ciklus)+"/"+Convert.ToString(vege)+")";
+                        kimenet.Update();
+                        toltes.Value = ciklus;
+                        toltes.Update();
+                    }
+                    kimenet.Text = "";
+                    Thread szal2 = new Thread(new ThreadStart(arraytostring));
+                    szal2.Start();
+                    while (!szal2.IsAlive)
+                    {
+                        kimenet.Text = "Szál inditása";
+                        kimenet.Update();
+                    }
+                    while (szal2.IsAlive)
+                    {
+                        kimenet.Text = "Várakozás az eredményre (" + Convert.ToString(ciklus) + "/" + Convert.ToString(vege) + ")";
+                        kimenet.Update();
+                        toltes.Value = ciklus;
+                        toltes.Update();
+                    }
+                    kimenet.Text = Convert.ToString(kiir);
                 }
             }
         });
@@ -74,5 +98,31 @@ public class MainActivity extends AppCompatActivity {
 
         }
         return false;
+    }
+    public static void primelist()
+    {
+        int prim = 1;
+        eredmeny = new int[veg];
+        for (ciklus = 0; ciklus < veg;)
+        {
+            if (isprime(prim) == true)
+            {
+                eredmeny[ciklus] = prim;
+                ciklus++;
+            }
+            prim++;
+
+        }
+    }
+    public static int vege = 0;
+    public static int[] eredmeny;
+    public static int veg, ciklus;
+    public static StringBuilder kiir = new StringBuilder("");
+    public static void arraytostring()
+    {
+        for (ciklus = 1; ciklus < vege; ciklus++)
+        {
+            kiir.append(Integer.toString(eredmeny[ciklus]) + "\r\n");
+        }
     }
 }

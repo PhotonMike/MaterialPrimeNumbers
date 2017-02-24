@@ -5,70 +5,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Handler;
 
 
 public class MainActivity extends AppCompatActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        final Button button = (Button) findViewById(R.id.button1);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                EditText betext = (EditText) findViewById(R.id.betext);
-                TextView kimenet = (TextView) findViewById(R.id.kimenet);
-                kimenet.setText("");
-                int prim = 1;
-                int veg = 0;
-                boolean a = true;
-                try
-                {
-                    veg = Integer.parseInt(betext.getText().toString())+1;
-                }
-                catch(Exception e)
-                {
-                    kimenet.setText("@string/number_in");
-                    a=false;
-                    veg=1;
-                }
-                if (a) {
-                    Thread szal = new Thread(new ThreadStart(primelist)) ;
-                    szal.Start();
-                    toltes.Maximum = vege;
-                    while (!szal.IsAlive)
-                    {
-                        kimenet.Text = "Szál inditása";
-                        kimenet.Update();
-                    }
-                    while (szal.IsAlive)
-                    {
-                        kimenet.Text = "Várakozás az eredményre ("+Convert.ToString(ciklus)+"/"+Convert.ToString(vege)+")";
-                        kimenet.Update();
-                        toltes.Value = ciklus;
-                        toltes.Update();
-                    }
-                    kimenet.Text = "";
-                    Thread szal2 = new Thread(new ThreadStart(arraytostring));
-                    szal2.Start();
-                    while (!szal2.IsAlive)
-                    {
-                        kimenet.Text = "Szál inditása";
-                        kimenet.Update();
-                    }
-                    while (szal2.IsAlive)
-                    {
-                        kimenet.Text = "Várakozás az eredményre (" + Convert.ToString(ciklus) + "/" + Convert.ToString(vege) + ")";
-                        kimenet.Update();
-                        toltes.Value = ciklus;
-                        toltes.Update();
-                    }
-                    kimenet.Text = Convert.ToString(kiir);
-                }
-            }
-        });
-    }
 
     public static boolean isprime(int a)
     {
@@ -105,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         eredmeny = new int[veg];
         for (ciklus = 0; ciklus < veg;)
         {
-            if (isprime(prim) == true)
+            if (isprime(prim))
             {
                 eredmeny[ciklus] = prim;
                 ciklus++;
@@ -118,11 +63,99 @@ public class MainActivity extends AppCompatActivity {
     public static int[] eredmeny;
     public static int veg, ciklus;
     public static StringBuilder kiir = new StringBuilder("");
-    public static void arraytostring()
+    public void arraytostring()
     {
-        for (ciklus = 1; ciklus < vege; ciklus++)
+        for (ciklus = 1; ciklus < veg; ciklus++)
         {
             kiir.append(Integer.toString(eredmeny[ciklus]) + "\r\n");
         }
     }
+    void updateOutput(final String out)
+    {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                kimenet.setText(out);
+            }
+        });
+    }
+    public void mainProgram() throws InterruptedException {
+        updateOutput("");
+        kiir.delete(0,kiir.length());
+        try
+        {
+            veg = Integer.parseInt(betext.getText().toString())+1;
+        }
+        catch(Exception e)
+        {
+            updateOutput(getString(R.string.number_in));
+            veg=1;
+        }
+            Thread szal = new Thread(new Runnable() {
+                //@Override
+                public void run() {
+                    primelist();
+                }
+            });
+            szal.start();
+            //toltes.setMax(vege);
+            while (!szal.isAlive())
+            {
+                updateOutput(getString(R.string.threadstart));
+            }
+            while (szal.isAlive())
+            {
+                updateOutput(getString(R.string.wait)+"("+Integer.toString(ciklus-1)+"/"+Integer.toString(veg-1)+")");
+                Thread.sleep(10);
+                //toltes.Value = ciklus;
+                //toltes.Update();
+            }
+            //kimenet.setText("");
+            Thread szal2 = new Thread(new Runnable() {
+                //@Override
+                public void run() {
+                    arraytostring();
+                }
+            });
+            szal2.start();
+            while (!szal2.isAlive())
+            {
+                updateOutput(getString(R.string.threadstart));
+            }
+            while (szal2.isAlive())
+            {
+                updateOutput(getString(R.string.merge)+"("+Integer.toString(ciklus-1)+"/"+Integer.toString(veg-1)+")");
+                Thread.sleep(10);
+                //toltes.Value = ciklus;
+                //toltes.Update();
+            }
+            updateOutput(kiir.toString());
+    }
+    EditText betext;
+    TextView kimenet;
+    ProgressBar toltes;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        final Button button = (Button) findViewById(R.id.button1);
+        betext = (EditText) findViewById(R.id.betext);
+        kimenet = (TextView) findViewById(R.id.kimenet);
+        toltes = (ProgressBar) findViewById(R.id.toltes);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Thread szalacska = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mainProgram();
+                        } catch (InterruptedException e) {}
+                    }
+                });
+                szalacska.start();
+            }
+        });
+    }
+
 }

@@ -3,4 +3,7 @@
     <string name="output">Enter a number into the box above, then click start</string>
     <string name="input">Enter the number of primes</string>
     <string name="number_in">Enter a number</string>
+    <string name="threadstart">Starting calculation</string>
+    <string name="wait">Waiting for the calculation</string>
+    <string name="merge">Loading results</string>
 </resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="threadstart">Számítás megkezdése</string>
+    <string name="wait">Várakozás az eredményre</string>
+    <string name="merge">Eredmények betöltése</string>
+</resources>
